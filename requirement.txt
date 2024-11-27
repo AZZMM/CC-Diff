@@ -1,0 +1,13 @@
+transformers
+torch==1.13.0
+accelerate
+flask
+flask_cors
+opencv-python
+einops
+diffusers==0.21.1
+omegaconf
+datasets
+imagesize
+matplotlib
+numpy==1.26.4

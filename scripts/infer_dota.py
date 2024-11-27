@@ -253,7 +253,7 @@ class StableDiffusionMIPipeline(StableDiffusionPipeline):
         width, height = pil_img.size
         draw = ImageDraw.Draw(pil_img)
         font_folder = os.path.dirname(os.path.dirname(__file__))
-        font_path = os.path.join('/home/node233/Workspace/Code/MIGC/Rainbow-Party-2.ttf')
+        font_path = os.path.join('./Rainbow-Party-2.ttf')
         font = ImageFont.truetype(font_path, 30)
 
         for box_id in range(len(bboxes)):
