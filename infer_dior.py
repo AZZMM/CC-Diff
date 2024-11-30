@@ -455,11 +455,11 @@ class StableDiffusionMIPipeline(StableDiffusionPipeline):
         
         
         ref_imgs = []
-        for index, (caption, bboxes) in enumerate(zip(prompt, bboxes)):
+        for index, (caption, bndboxes) in enumerate(zip(prompt, bboxes)):
             categories = caption[1:]
             instances = []
             instance_imgs = []
-            for name,bbox in zip(categories, bboxes):
+            for name,bbox in zip(categories, bndboxes):
                 if name == '':
                     instances.append(torch.zeros([3, 224, 224]))
                 else:                   
@@ -495,7 +495,8 @@ class StableDiffusionMIPipeline(StableDiffusionPipeline):
                 )
                 
                 # predict the noise residual
-                cross_attention_kwargs = {'bboxes': obboxes,                                         
+                cross_attention_kwargs = {'bboxes': bboxes,
+                                          'obboxes': obboxes,                                         
                                           'embeds_pooler': embeds_pooler,
                                           'height': height,
                                           'width': width,

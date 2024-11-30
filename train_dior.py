@@ -466,7 +466,7 @@ def parse_args():
             " more information see https://huggingface.co/docs/accelerate/v0.17.0/en/package_reference/accelerator#accelerate.Accelerator"
         ),
     )
-    parser.add_argument("--img_patch_path",type=str,default="path_to_data/DIOR/foreground")
+    parser.add_argument("--img_patch_path",type=str,default="path_to_data/DIOR/results/foreground")
     parser.add_argument("--ref_resolution", type=int, default=224)
     parser.add_argument(
         "--image_encoder_path",

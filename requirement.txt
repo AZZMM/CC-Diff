@@ -1,5 +1,6 @@
 transformers
 torch==1.13.0
+torchvision==0.14.0
 accelerate
 flask
 flask_cors
@@ -11,3 +12,4 @@ datasets
 imagesize
 matplotlib
 numpy==1.26.4
+huggingface-hub==0.24.6
