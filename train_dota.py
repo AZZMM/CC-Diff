@@ -57,7 +57,7 @@ from diffusers.utils.import_utils import is_xformers_available
 
 from ccdiff.attention_processor import set_processors
 from ccdiff.projection import Resampler, SerialSampler
-from ccdiff.coco_utils import get_similar_examplers
+from ccdiff.dota_utils import get_similar_examplers
 from ccdiff.modules import FrozenDinoV2Encoder
 
 if is_wandb_available():
@@ -466,8 +466,7 @@ def parse_args():
             " more information see https://huggingface.co/docs/accelerate/v0.17.0/en/package_reference/accelerator#accelerate.Accelerator"
         ),
     )
-    parser.add_argument("--img_patch_path",type=str,default="/home/node233/Workspace/data/coco2017/results/foreground")
-    parser.add_argument("--mask_path",type=str,default="/home/node233/Workspace/data/RS_ObjLib/DIOR/mask")
+    parser.add_argument("--img_patch_path",type=str,default="path_to_data/DOTA/results/foreground")
     parser.add_argument("--ref_resolution", type=int, default=224)
     parser.add_argument(
         "--image_encoder_path",
@@ -605,16 +604,6 @@ def main():
         output_dim=unet.config.cross_attention_dim,
         ff_mult=4,
     )
-    # bg_proj_model = Resampler(
-    #     dim=1280,
-    #     depth=4,
-    #     dim_head=64,
-    #     heads=20,
-    #     num_queries=4,
-    #     embedding_dim=image_encoder.config.hidden_size,
-    #     output_dim=unet.config.cross_attention_dim,
-    #     ff_mult=4,
-    # )
     
     # Freeze vae and text_encoder and part of unet
     vae.requires_grad_(False)
@@ -673,9 +662,7 @@ def main():
     # cf https://pytorch.org/docs/stable/notes/cuda.html#tensorfloat-32-tf32-on-ampere-devices
     if args.allow_tf32:
         torch.backends.cuda.matmul.allow_tf32 = True
-        torch.backends.cudnn.allow_tf32 = True
-        torch.backends.cudnn.benchmark = True
-        
+
     if args.scale_lr:
         args.learning_rate = (
             args.learning_rate * args.gradient_accumulation_steps * args.train_batch_size * accelerator.num_processes
@@ -684,13 +671,9 @@ def main():
     # Initialize the optimizer
     optimizer_cls = torch.optim.AdamW
     optimizer = optimizer_cls(
-        # itertools.chain(custom_layers.parameters(), image_proj_model.parameters(), parser.parameters()),
         itertools.chain(custom_layers.parameters(), 
                         image_proj_model.parameters(),
-                        # bg_proj_model.parameters(),
                         ),
-        # [param for param in unet.parameters() if param.requires_grad],
-        # custom_layers.parameters(),
         lr=args.learning_rate,
         betas=(args.adam_beta1, args.adam_beta2),
         weight_decay=args.adam_weight_decay,
@@ -745,7 +728,7 @@ def main():
                 f"--caption_column' value '{args.caption_column}' needs to be one of: {', '.join(column_names)}"
             )
     bbox_column = column_names[2]
-    # obbox_column = column_names[3]
+    obbox_column = column_names[3]
     # Preprocessing the datasets.
     # We need to tokenize input captions and transform the images.
     
@@ -873,36 +856,24 @@ def main():
     train_transforms = transforms.Compose(
         [
             transforms.Resize([args.resolution, args.resolution], interpolation=transforms.InterpolationMode.BILINEAR),
-            # transforms.CenterCrop(args.resolution) if args.center_crop else transforms.RandomCrop(args.resolution),
-            # transforms.RandomHorizontalFlip() if args.random_flip else transforms.Lambda(lambda x: x),
             transforms.ToTensor(),
             transforms.Normalize(
                 [0.5], [0.5]
-                # mean=[0.485, 0.456, 0.406],
-                # std=[0.229, 0.224, 0.225]
             ),
         ]
     )
     dict_of_images = {}
-    list_of_name = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light', 
-                    'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow', 
-                    'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
-                    'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard', 'tennis racket', 'bottle',
-                    'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich', 'orange',
-                    'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch', 'potted plant', 'bed',
-                    'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven',
-                    'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
+    list_of_name = ("plane","ship","storage-tank","baseball-diamond","tennis-court",
+                    "basketball-court","ground-track-field","harbor","bridge","large-vehicle",
+                    "small-vehicle","helicopter","roundabout","soccer-ball-field","swimming-pool")
     for name in list_of_name:
         name_of_dir = os.path.join(args.img_patch_path, name)
         list_of_image = os.listdir(name_of_dir)
-        # list_of_image = sorted(list_of_image, key = lambda x: os.stat(os.path.join(name_of_dir, x)).st_size, reverse=True)
-        # dict_of_images[name] = list_of_image[:200]
-        num = 200 if len(list_of_image) > 200 else len(list_of_image)
         list_of_image = sorted(list_of_image, 
                                key = lambda img: functools.reduce(lambda x, y: x*y, 
                                                                   imagesize.get(os.path.join(name_of_dir, img))
                                                                 ), reverse=True)
-        dict_of_images[name] = {img: functools.reduce(lambda x, y: x/y, imagesize.get(os.path.join(name_of_dir, img))) for img in list_of_image[:num]}
+        dict_of_images[name] = {img: functools.reduce(lambda x, y: x/y, imagesize.get(os.path.join(name_of_dir, img))) for img in list_of_image[:200]}
         
         
     def preprocess_train(examples):
@@ -910,7 +881,7 @@ def main():
         examples["pixel_values"] = [train_transforms(image) for image in images]
         examples["captions"] = [caption for caption in examples[caption_column]]
         examples["bboxes"] = [bbox for bbox in examples[bbox_column]]
-        # examples["obboxes"] = [bbox for bbox in examples[obbox_column]]
+        examples["obboxes"] = [bbox for bbox in examples[obbox_column]]
         # Construct reference cropped instance base
         examples["instances"] = []
         for index, (caption, bboxes) in enumerate(zip(examples["captions"], examples["bboxes"])):
@@ -920,12 +891,9 @@ def main():
                 if name == '':
                     instances.append(torch.zeros([3, args.ref_resolution, args.ref_resolution]))
                 else:
-                    # chosen_file = random.choice(dict_of_images[name])
-                    # value = (bbox[2] - bbox[0]) * (bbox[3] - bbox[1]) * images[index].height * images[index].width    # foreground size based on HBB
                     value = (bbox[2] - bbox[0]) / (bbox[3] - bbox[1])    # foreground aspect ratio based on HBB
                     chosen_file = list(dict_of_images[name].keys())[find_nearest(list(dict_of_images[name].values()), value)]
                     img = Image.open(os.path.join(args.img_patch_path, name, chosen_file)).convert('RGB')
-                    # img = ref_transforms(img.convert("RGB"))
                     img = image_processor(images=img, return_tensors="pt")['pixel_values'].squeeze(0)
                     instances.append(img)
             examples["instances"].append(torch.stack([instance for instance in instances])) 
@@ -939,15 +907,13 @@ def main():
         train_dataset = dataset["train"].with_transform(preprocess_train)
 
     def collate_fn(examples):
-        # filenames = [example[image_column] for example in examples]
         pixel_values = torch.stack([example["pixel_values"] for example in examples])
         pixel_values = pixel_values.to(memory_format=torch.contiguous_format).float()
-        # input_ids = torch.stack([example["input_ids"] for example in examples])
         captions = [example["captions"] for example in examples]
         instances = torch.stack([example["instances"] for example in examples])
         bboxes = [example["bboxes"] for example in examples]
-        # obboxes = [example["obboxes"] for example in examples]
-        return {"pixel_values": pixel_values, "prompts": captions, "instances": instances,"bboxes": bboxes}
+        obboxes = [example["obboxes"] for example in examples]
+        return {"pixel_values": pixel_values, "prompts": captions, "instances": instances,"bboxes": bboxes, "obboxes": obboxes}
 
     # DataLoaders creation:
     train_dataloader = torch.utils.data.DataLoader(
@@ -996,7 +962,6 @@ def main():
     vae.to(accelerator.device, dtype=weight_dtype)
     image_encoder.to(accelerator.device, dtype=weight_dtype)
     image_proj_model.to(accelerator.device, dtype=weight_dtype)
-    # bg_proj_model.to(accelerator.device, dtype=weight_dtype)
     
     # We need to recalculate our total training steps as the size of the training dataloader may have changed.
     num_update_steps_per_epoch = math.ceil(len(train_dataloader) / args.gradient_accumulation_steps)
@@ -1045,7 +1010,6 @@ def main():
             accelerator.print(f"Resuming from checkpoint {path}")
             accelerator.load_state(os.path.join(args.output_dir, path))
             image_proj_model.load_state_dict(torch.load(os.path.join(args.output_dir, path, 'ImageProjModel.pth')))
-            # bg_proj_model.load_state_dict(torch.load(os.path.join(args.output_dir, path, 'BGProjModel.pth')))
             global_step = int(path.split("-")[1])
 
             resume_global_step = global_step * args.gradient_accumulation_steps
@@ -1115,45 +1079,41 @@ def main():
                     prompt_nums[i] = len(_)
                 
                 bboxes = batch["bboxes"]    
-                # obboxes = batch["obboxes"]
+                obboxes = batch["obboxes"]
                 height = 512 
                 width = 512 
-                ref_imgs = batch["instances"].view(bsz * len(bboxes[0]), 3, args.ref_resolution, args.ref_resolution)
+                ref_imgs = batch["instances"].view(bsz * len(obboxes[0]), 3, args.ref_resolution, args.ref_resolution)
                 with torch.no_grad():
                     img_features = image_encoder(ref_imgs)
                     bg_img = get_similar_examplers(None, text_embeds[0], topk=1, sim_mode='text2img')
                     bg_img = Image.open(os.path.join(args.train_data_dir, bg_img[0])).convert('RGB')
                     bg_img = image_processor(images=bg_img, return_tensors="pt")['pixel_values'].to(img_features.device)
                     bg_features = image_encoder(bg_img)
-                # img_features, bg_features = image_proj_model(torch.stack([img_features, text_embeds[1:]], dim=1), 
-                #                                              torch.stack([bg_features, text_embeds[[0]]], dim=1))
-                img_features, bg_features = image_proj_model(img_features, bboxes, bg_features)
-                # bg_features = bg_proj_model(bg_features)
-                # ref_features = torch.cat([bg_features, img_features], dim=0)
-                # guidance_masks = []
-                # for bbox in obboxes[0]:  
-                #     guidance_mask = np.zeros((height, width))
-                #     if np.count_nonzero(bbox):
-                #         pts = np.array(bbox).reshape(-1, 1, 2)
-                #         pts[..., 0] = pts[..., 0] * width
-                #         pts[..., 1] = pts[..., 1] * height
-                #         pts = np.int32(pts)
-                #         guidance_masks.append(cv2.fillPoly(guidance_mask, [pts], 1)[None, ...])
-                #     else:
-                #         guidance_masks.append(guidance_mask[None, ...])
+                img_features, bg_features = image_proj_model(img_features, obboxes, bg_features)
+                
+                guidance_masks = []
+                for bbox in obboxes[0]:  
+                    guidance_mask = np.zeros((height, width))
+                    if np.count_nonzero(bbox):
+                        pts = np.array(bbox).reshape(-1, 1, 2)
+                        pts[..., 0] = pts[..., 0] * width
+                        pts[..., 1] = pts[..., 1] * height
+                        pts = np.int32(pts)
+                        guidance_masks.append(cv2.fillPoly(guidance_mask, [pts], 1)[None, ...])
+                    else:
+                        guidance_masks.append(guidance_mask[None, ...])
                 
                 cross_attention_kwargs = {'bboxes': bboxes,
-                                        #   'obboxes': obboxes,                                          
+                                          'obboxes': obboxes,                                          
                                           'embeds_pooler': embeds_pooler,                                          
                                           'height': height,
                                           'width': width,
-                                        #   'ref_features': ref_features,
                                           'ref_features': (img_features, bg_features),
                                           }
                 
                 # Predict the noise residual and compute loss
                 model_pred = unet(noisy_latents, timesteps, encoder_hidden_states, cross_attention_kwargs=cross_attention_kwargs).sample
-                                  
+                      
                 loss = F.mse_loss(model_pred.float(), target.float(), reduction="mean")
                 # Gather the losses across all processes for logging (if we use distributed training).
                 avg_loss = accelerator.gather(loss.repeat(args.train_batch_size)).mean()
@@ -1201,7 +1161,6 @@ def main():
                         save_path = os.path.join(args.output_dir, f"checkpoint-{global_step}")
                         accelerator.save_state(save_path)
                         torch.save(image_proj_model.state_dict(), os.path.join(save_path, 'ImageProjModel.pth'))
-                        # torch.save(bg_proj_model.state_dict(), os.path.join(save_path, 'BGProjModel.pth'))
                         logger.info(f"Saved state to {save_path}")
 
             logs = {"step_loss": loss.detach().item(), "lr": lr_scheduler.get_last_lr()[0]}
@@ -1255,9 +1214,6 @@ def main():
             pipeline = pipeline.to(accelerator.device)
             pipeline.torch_dtype = weight_dtype
             pipeline.set_progress_bar_config(disable=True)
-
-            if args.enable_xformers_memory_efficient_attention:
-                pipeline.enable_xformers_memory_efficient_attention()
 
             if args.seed is None:
                 generator = None
