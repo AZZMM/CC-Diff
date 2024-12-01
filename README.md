@@ -1,5 +1,5 @@
 # CC-Diff: Enhancing Contextual Coherence in Remote Sensing Image Synthesis
-![pipeline](./figures/Fig1.png)
+![Fig1](./figures/Fig1.png)
 
 ## Installation
 
@@ -44,7 +44,7 @@ Data processing scripts are in ```data_tools```.
 ```
 
 ## Visualizations
-![pipeline](./figures/Fig2.png)
+![Fig2](./figures/Fig2.png)
 
 ## Acknowledgements
 Our work is based on [stable diffusion](https://github.com/Stability-AI/StableDiffusion), [diffusers](https://github.com/huggingface/diffusers), [CLIP](https://github.com/openai/CLIP), We appreciate their outstanding contributions.
