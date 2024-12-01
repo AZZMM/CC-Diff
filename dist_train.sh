@@ -1,6 +1,6 @@
 nohup accelerate launch --main_process_port=29730 train_dior.py \
     --pretrained_model_name_or_path=stable-diffusion-v1-4 \
-    --train_data_dir=/home/node233/Workspace/data/GenDIOR/train \
+    --train_data_dir=path_to_data/DIOR/train \
     --resolution=512 \
     --train_batch_size=1 \
     --gradient_accumulation_steps=40 \

@@ -1,5 +1,5 @@
 # CC-Diff: Enhancing Contextual Coherence in Remote Sensing Image Synthesis
-
+![pipeline](./figures/Fig1.png)
 
 ## Installation
 
@@ -9,6 +9,9 @@ conda create -n CC-Diff python=3.9 -y
 conda activate CC-Diff
 pip install -r requirement.txt
 ```
+
+## Checkpoint
+Download the [DIOR_checkpoint](https://drive.google.com/drive/folders/1_gdFS-jN4z-RcvT5_IDcPq4_1JJK6FOA?usp=sharing) or [DOTA_checkpoint](https://drive.google.com/drive/folders/1kKhpMUhBOatccbsflubOIm1_qeepcEla?usp=sharing)
 
 ## Inference
 
@@ -33,11 +36,15 @@ DIOR
 │   ├── ...
 ├── dior_emb.pt
 ```
-Here are more details.
+Data processing scripts are in ```data_tools```.
 
 ## Training
 ```
 ./dist_train.sh
 ```
 
+## Visualizations
+![pipeline](./figures/Fig2.png)
+
 ## Acknowledgements
+Our work is based on [stable diffusion](https://github.com/Stability-AI/StableDiffusion), [diffusers](https://github.com/huggingface/diffusers), [CLIP](https://github.com/openai/CLIP), We appreciate their outstanding contributions.
