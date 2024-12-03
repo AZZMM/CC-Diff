@@ -1,5 +1,9 @@
-# CC-Diff: Enhancing Contextual Coherence in Remote Sensing Image Synthesis
+<div align="center">
+<h1>CC-Diff: Enhancing Contextual Coherence in Remote Sensing Image Synthesis</h1>
+</div>
 
+## 🔥News
+- 2024-12-03: Publish initial code.
 ## Abstract
 Accurately depicting real-world landscapes in remote sensing (RS) images requires precise alignment between objects and their environment. However, most existing synthesis methods for natural images prioritize foreground control, often reducing the background to plain textures. This neglects the interaction between foreground and background, which can lead to incoherence in RS scenarios. In this paper, we introduce CC-Diff, a **Diff**usion Model-based approach for RS image generation with enhanced **C**ontext **C**oherence. To capture spatial interdependence, we propose a sequential pipeline where background generation is conditioned on synthesized foreground instances. Distinct learnable queries are also employed to model both the complex background texture and its semantic relation to the foreground. Extensive experiments demonstrate that CC-Diff outperforms state-of-the-art methods in visual fidelity, semantic accuracy, and positional precision, excelling in both RS and natural image domains. CC-Diff also shows strong trainability, improving detection accuracy by 2.04 mAP on DOTA and 2.25 mAP on the COCO benchmark.
 
@@ -19,10 +23,10 @@ Accurately depicting real-world landscapes in remote sensing (RS) images require
     <table>
         <tr>
             <td align="center">
-                <img src="figures/dual_resampler.png" alt="dual resampler" height="500px">
+                <img src="figures/dual_resampler.png" alt="dual resampler" height="300px">
             </td>
             <td align="center">
-                <img src="figures/cond_gen.png" alt="cond gen" height="500px">
+                <img src="figures/cond_gen.png" alt="cond gen" height="300px">
             </td>
         </tr>
     </table>
