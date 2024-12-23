@@ -3,7 +3,8 @@
 </div>
 
 ## 🔥News
-- 2024-12-03: Publish initial code (arxiv coming soon).
+- 2024-12-03: Publish initial code.
+- 2024-12-12: Arxiv is avaliable [(arxiv: 2412.08464)](https://arxiv.org/abs/2412.08464).
 ## Abstract
 <div style="text-align:justify">
 Accurately depicting real-world landscapes in remote sensing (RS) images requires precise alignment between objects and their environment. However, most existing synthesis methods for natural images prioritize foreground control, often reducing the background to plain textures. This neglects the interaction between foreground and background, which can lead to incoherence in RS scenarios. In this paper, we introduce CC-Diff, a <b>Diff</b>usion Model-based approach for RS image generation with enhanced <b>C</b>ontext <b>C</b>oherence. To capture spatial interdependence, we propose a sequential pipeline where background generation is conditioned on synthesized foreground instances. Distinct learnable queries are also employed to model both the complex background texture and its semantic relation to the foreground. Extensive experiments demonstrate that CC-Diff outperforms state-of-the-art methods in visual fidelity, semantic accuracy, and positional precision, excelling in both RS and natural image domains. CC-Diff also shows strong trainability, improving detection accuracy by 2.04 mAP on DOTA and 2.25 mAP on the COCO benchmark.
