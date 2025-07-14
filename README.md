@@ -311,5 +311,30 @@ Train CC-Diff model:
 ./dist_train.sh
 ```
 
+### 4. CC-Diff++
+
+We include the implementation of the enhanced version: **CC-Diff++** in ```ccdiff_pp``` folder.
+
+Training:
+Just replace the script ```train_dior.py``` in ```./dist_train.sh``` with ```train_dior_pp.py``` to train the CC-Diff++ model.
+
+Inference:
+```bash
+accelerate launch 
+  --main_process_port=29500,
+  --num_processes=8
+  infer_dior_pp.py
+```
+
+### 5.synthetic images
+We here publish the synthetic images used in the trainability experiments for every dataset, enabling exact reproduction of our results.
+
+DIOR-RSVG: [link](https://pan.baidu.com/s/1nBad0IK8BSM_pUBwdm5Z7g?pwd=ccdp), Password: ccdp
+
+DOTA: [link](https://pan.baidu.com/s/1P5vshdqUHFPOxH4JNveMbQ?pwd=ccdp), Password: ccdp
+
+HRSC: [link](https://pan.baidu.com/s/1sBL07plL8bvWrvyzUS-YSg?pwd=ccdp), Password: ccdp
+
+
 ## Acknowledgements
 Our work is based on [stable diffusion](https://github.com/Stability-AI/StableDiffusion), [diffusers](https://github.com/huggingface/diffusers), [CLIP](https://github.com/openai/CLIP), We appreciate their outstanding contributions.
