@@ -79,4 +79,11 @@ Custom modifications for training Faster RCNN on combined synthesized and origin
 
 ---
 
-For further details, please refer to the provided scripts or
+## 6. Additional Evaluation Introduction
+
+- Learnable params and FLOPs can be calculated using ```eval/utils/eval_compute_complexity.py```.
+- GPU hours and Inference Speed can be found in the log when using ```train_dior.py``` and ```infer_dior.py```.
+
+---
+
+For further details, please refer to the provided scripts.
