@@ -53,7 +53,7 @@ python train.py
 ```
 
 - Use `train.py` to fine-tune the YOLOv8 model for YOLOScore evaluation.
-- We provide a reference [checkpoint](https://pan.baidu.com/s/1YlLSGs5WIdaSJmvtoIigbg?pwd=ccdp) for DIOR-RSVG
+- We provide a reference [checkpoint](https://pan.baidu.com/s/1YlLSGs5WIdaSJmvtoIigbg?pwd=ccdp) for DIOR-RSVG and an OBB-detector reference [checkpoint](https://pan.baidu.com/s/1Kzv9FL-4lbBlAhMSnW08fw?pwd=ccdp).
 ---
 
 ## 4. Metric Calculation

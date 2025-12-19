@@ -13,3 +13,5 @@ rm -rf $yolo_img_path/val
 mkdir -p $yolo_img_path/val
 cp $syn_img_path/* $yolo_img_path/val
 python ultralytics/val.py
+# if calculate OBB yoloscore, change the labelTxt of val set to OBB version and:
+# python ultralytics/val_obb.py
